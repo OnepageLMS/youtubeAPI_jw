@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page session="false" %>
 <html>
@@ -21,13 +22,13 @@
             position: fixed;
             text-align: center;
             width: 560px;
-            background-color: #fff;
+            background-color: #fff; 
         }
         main {
         	/* padding: 350px 10px 20px; */        
         	padding: 20px 10px 20px;
         }
-        body {
+        body { 
         	background-color: #eee;
         }
         main {
@@ -66,12 +67,15 @@
 			<c:out value="${u.youtubeID }"/>
 			<c:out value="${u.start_s }"/>
 			<c:out value="${u.end_s }"/>
+			
+			<c:set var="start" value="${Math.round (u.start_s)}" />
+			<c:set var="end" value="${Math.round (u.end_s)}" />
 			<div>
-				<iframe width="560" height="315" src="https://www.youtube.com/embed/${u.youtubeID}?start=${u.start_s}&end=${u.end_s}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+				<iframe width="560" height="315" src="https://www.youtube.com/embed/${u.youtubeID}?start=${start }&end=${end}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
 				</iframe>
+				
 			</div>
 		</c:forEach>
-		
 		
 	</div>
 	
@@ -80,6 +84,8 @@
 			var key = 'AIzaSyC0hiwYHhlDC98F1v9ERNXnziHown0nGjg';
 			var URL = 'https://www.googleapis.com/youtube/v3/videos';
 
+			// youtube search가 되면, 그 동영상 id를 jsp에서 자바스크립트를 호출해서 options.id값을 설정해주도록 해야함.
+			//  
 			var options = {
 				part: 'contentDetails',
 				id: 'wzAWI9h3q18',
@@ -118,7 +124,9 @@
 				');
 
 			} */
-			
+
+
+			// The below code is not used anymore;
 			function mainVid(id) {
 				var start = 20;
 				var end = 25;
@@ -144,12 +152,13 @@
 		      height: '315',
 		      width: '560',
 		      //videoId: 'wzAWI9h3q18',
+		      
+		      // rel: 0 will not work due to Youtube policy issues. (as of 2018/9/25) 
 		      playerVars: {rel: 0},
 		      events: {
 			      'onReady' : onPlayerReady,
 				}
 		    });
-		 	 
 		  }
 
 		function onPlayerReady() {
@@ -160,12 +169,6 @@
 		  
 		  
 		// 3. get player.playerInfo.currentTime
-		/* window.onclick = () => {
-		  console.log(player);
-		  document.getElementById("start_s").value = player.playerInfo.currentTime;
-		  //alert(player.playerInfo.currentTime);
-		} */
-
 		function getCurrentPlayTime1(){
 			document.getElementById("start_s").value = player.playerInfo.currentTime;
 			//alert(vid.currentTime);
