@@ -54,7 +54,53 @@
 			padding: 8px 22px;
 		}
     </style>
+<script>
+function showList(data){
+    //$.each(data.items, function (i, item) {
+
+        var thumb = data.items[0].snippet.thumbnails.medium.url;
+        var title = data.items[0].snippet.title;
+        var desc = data.items[0].snippet.description.substring(0, 100);
+        var vid = data.items[0].id;
+        
+        $('main').append(`
+						<article class="item" data-key="\${vid}">
+
+							<img src="\${thumb}" alt="" class="thumb">
+							<div class="details">
+								<h4>\${title}</h4>
+								<p>\${desc}</p>
+							</div>
+
+						</article>
+					`);
+		console.log(222);
+   // });
+}
+
+function resultsLoop(videoId) {
+	var key = 'AIzaSyC0hiwYHhlDC98F1v9ERNXnziHown0nGjg';
+	var URL = 'https://www.googleapis.com/youtube/v3/videos';
+
+	// youtube search가 되면, 그 동영상 id를 jsp에서 자바스크립트를 호출해서 options.id값을 설정해주도록 해야함.
+	//  
+	var options = {
+		part: 'contentDetails, snippet',
+		id: videoId,
+		key: key
+	}
+	$.getJSON(URL, options, function(data) {
+		//console.log(data);
+		showList(data);
+	});
+	console.log(111);
+}
+
+
+</script>
+
 </head>
+
 <body>
 	<div class="container">
 		<section id="video">
@@ -80,19 +126,17 @@
 		
 		<p> show list of videos that are in playlistID == ${list[0].playlistID } </p>
 		
-		<main>
-			
-		</main>
 		
+		<c:set var="i" value="${1}" /> 
 		<c:forEach items="${list }" var="u">
-			<c:out value="${u.youtubeID }"/>
+			<%-- <c:out value="${u.youtubeID }"/>
 			<c:out value="${u.start_s }"/>
-			<c:out value="${u.end_s }"/>
+			<c:out value="${u.end_s }"/> --%>
 			
 			<!-- html로 유투브 영상을 만드려고 할 시에는 소수점은 안되고 온전한 초 단위로만 구간 설정이 안된다.   -->
 			<c:set var="start" value="${Math.round (u.start_s)}" />
 			<c:set var="end" value="${Math.round (u.end_s)}" />
-			<div>
+			<%-- <div>
 				<iframe width="560" height="315" src="https://www.youtube.com/embed/${u.youtubeID}?start=${start }&end=${end}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
 				</iframe>
 				<!-- <script>
@@ -100,7 +144,17 @@
 				</script> -->
 				<img style="width: 100px; height: auto;" src="https://img.youtube.com/vi/${u.youtubeID}/0.jpg"/>
 				
-			</div>
+			</div> --%>
+			<c:out value="${i}" /> 
+			<c:set var="i" value="${i+1}" />
+			
+			<script>
+					//console.log("look:::" + `${u.youtubeID}`);
+					resultsLoop(`${u.youtubeID}`);
+			</script>
+			<main>
+				
+			</main>
 		</c:forEach>
 		
 	</div>
@@ -243,55 +297,7 @@
 			} */
 			//return true;
 		}
-		function resultsLoop(videoId) {
-			var key = 'AIzaSyC0hiwYHhlDC98F1v9ERNXnziHown0nGjg';
-			var URL = 'https://www.googleapis.com/youtube/v3/videos';
-
-			// youtube search가 되면, 그 동영상 id를 jsp에서 자바스크립트를 호출해서 options.id값을 설정해주도록 해야함.
-			//  
-			var options = {
-				part: 'contentDetails, snippet',
-				id: videoId,
-				key: key
-			}
-			$.getJSON(URL, options, function(data) {
-				console.log(data);
-				
-		       /*  var start = 10;
-		        var end = 15; */
-				document.getElementById("title").value = data.items[0].snippet.title;
-		        document.getElementById("start_s").value = 22;
-		        document.getElementById("end_s").value = 29;
-		        document.getElementById("end_s").setAttribute("max", total_seconds);
-		        //$("end_s").attr("max", total_seconds);
-		        document.getElementById("youtubeID").value = options.id;
-
-		        var end_time = document.getElementById("end_s");
-				console.log(end_time.getAttribute("max"));
-
-				//resultsLoop(data);
-			});
-			
-	        $.each(data.items, function (i, item) {
-
-	            var thumb = item.snippet.thumbnails.medium.url;
-	            var title = item.snippet.title;
-	            var desc = item.snippet.description.substring(0, 100);
-	            var vid = item.id;
-
-	            $('main').append(`
-								<article class="item" data-key="\${vid}">
-
-									<img src="\${thumb}" alt="" class="thumb">
-									<div class="details">
-										<h4>\${title}</h4>
-										<p>\${desc}</p>
-									</div>
-
-								</article>
-							`);
-	        });
-	    }
+		
 
 		// CLICK EVENT
 	    $('main').on('click', 'article', function () {
