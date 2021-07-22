@@ -251,9 +251,26 @@
 			//  
 			var options = {
 				part: 'contentDetails, snippet',
-				id: 'wzAWI9h3q18',
+				id: videoId,
 				key: key
 			}
+			$.getJSON(URL, options, function(data) {
+				console.log(data);
+				
+		       /*  var start = 10;
+		        var end = 15; */
+				document.getElementById("title").value = data.items[0].snippet.title;
+		        document.getElementById("start_s").value = 22;
+		        document.getElementById("end_s").value = 29;
+		        document.getElementById("end_s").setAttribute("max", total_seconds);
+		        //$("end_s").attr("max", total_seconds);
+		        document.getElementById("youtubeID").value = options.id;
+
+		        var end_time = document.getElementById("end_s");
+				console.log(end_time.getAttribute("max"));
+
+				//resultsLoop(data);
+			});
 			
 	        $.each(data.items, function (i, item) {
 
