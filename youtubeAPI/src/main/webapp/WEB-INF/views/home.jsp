@@ -96,6 +96,12 @@ function resultsLoop(videoId) {
 	console.log(111);
 }
 
+/* //CLICK EVENT
+$('main').on('click', 'article', function () {
+    var id = $(this).attr('data-key');
+   	console.log("click id" , id);
+    mainVid(id);
+}); */
 
 </script>
 
@@ -259,6 +265,7 @@ function resultsLoop(videoId) {
 		function getCurrentPlayTime2(){
 			//document.getElementById("end_s").value = player.playerInfo.currentTime;
 			document.getElementById("end_s").value = player.getCurrentTime();
+			
 		}
 
 		function validation(){
@@ -272,18 +279,20 @@ function resultsLoop(videoId) {
 			document.getElementById("warning1").innerHTML = "";
 			document.getElementById("warning2").innerHTML = "";
 			
-			let x = document.forms["timeForm"]["end_s"].value;
+			let x = parseInt(document.forms["timeForm"]["end_s"].value);
 
-			var start_time = document.getElementById("start_s").value; 
-			var end_time = document.getElementById("end_s").value;
+			var start_time = parseInt(document.getElementById("start_s").value); 
+			var end_time = parseInt(document.getElementById("end_s").value);
 
 			if(start_time > end_time) {
+				console.log("value of start_time: "+ start_time);	
+				console.log("value of end_time: "+ end_time);
 				document.getElementById("warning1").innerHTML = "start time cannot exceed end time";
 				document.getElementById("start_s").focus();
 				return false;
 			}
 			if(x > limit){
-				console("value of x: "+ x);
+				console.log("value of x: "+ x);
 				document.getElementById("warning2").innerHTML = "Please insert again";
 				document.getElementById("end_s").focus();
 				return false;
@@ -299,11 +308,7 @@ function resultsLoop(videoId) {
 		}
 		
 
-		// CLICK EVENT
-	    $('main').on('click', 'article', function () {
-	        var id = $(this).attr('data-key');
-	        mainVid(id);
-	    });
+		
 
 			
 		/* this does not work:
