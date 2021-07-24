@@ -9,6 +9,7 @@
 	<script src="https://code.jquery.com/jquery-3.3.1.js"
         integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
         crossorigin="anonymous">
+    
     </script>
     
     <style>
@@ -54,7 +55,7 @@
 			padding: 8px 22px;
 		}
     </style>
-<script>
+<script type="text/javascript">
 function showList(data){
     //$.each(data.items, function (i, item) {
 
@@ -74,7 +75,7 @@ function showList(data){
 
 						</article>
 					`);
-		console.log(222);
+		console.log(2);
    // });
 }
 
@@ -103,6 +104,27 @@ $('main').on('click', 'article', function () {
     mainVid(id);
 }); */
 
+function savePlaylist(event){		
+		event.preventDefault(); // avoid to execute the actual submit of the form.
+
+		var form = $('#savePlaylistForm');
+		var url = form.attr('action');
+		
+		$.ajax({
+			'type': "POST",
+			'url': "http://localhost:8080/myapp/addok",
+			'data': form.serialize(),
+			success: function(data) {
+				alert("saved successfully!");
+				console.log("saved succes");
+			},
+			error: function(error) {
+				alert(error);
+			},
+		});
+		return false;
+}
+
 </script>
 
 </head>
@@ -113,12 +135,14 @@ $('main').on('click', 'article', function () {
 		
 		</section>
 		
-		<form name="timeForm" action="addok" method="post" onsubmit="return validation()">
-				<input type="hidden" name="youtubeID" id="youtubeID" value="">
+			<form id="savePlaylistForm" onsubmit="return validation(event)" >
+				<input type="hidden" name="youtubeID" id="youtubeID">
+				<input type="hidden" name="start_s" id="start_s">
+				<input type="hidden" name="end_s" id="end_s">
 				video title: <textarea rows="2" cols="50" name="title" id="title" style="margin-bottom: 10px;"> </textarea> <br> 
-				start time:  <input type="text" name="start_s" id="start_s" > <button onclick="getCurrentPlayTime1()" type="button"> current Time</button> <span id=warning1 style="color:red;"></span> <br>
-				end time: <input type="text" name="end_s" id="end_s" max=""> <button onclick="getCurrentPlayTime2()" type="button"> current Time</button>  <span id=warning2 style="color:red;"></span> <br>
-				playlist num: <input type="text" name="playlistID" >
+				start time:  <input type="text" id="start_hh" maxlength="2" size="2"> 시 <input type="text" id="start_mm" maxlength="2" size="2"> 분 <input type="text" id="start_ss" maxlength="5" size="5"> 초 <button onclick="getCurrentPlayTime1()" type="button"> current Time</button> <span id=warning1 style="color:red;"></span> <br>
+				end time: <input type="text" id="end_hh" max="" maxlength="2" size="2"> 시 <input type="text" id="end_mm" max="" maxlength="2" size="2"> 분 <input type="text" id="end_ss" maxlength="5" size="5"> 초<button onclick="getCurrentPlayTime2()" type="button"> current Time</button>  <span id=warning2 style="color:red;"></span> <br>
+				playlist num: <input type="text" name="playlistID" required>
 				
 				<button type="submit" > submit </button>
 				<!-- id="btn-submit" disabled="disabled" -->
@@ -136,12 +160,12 @@ $('main').on('click', 'article', function () {
 		<c:set var="i" value="${1}" /> 
 		<c:forEach items="${list }" var="u">
 			<%-- <c:out value="${u.youtubeID }"/>
-			<c:out value="${u.start_s }"/>
-			<c:out value="${u.end_s }"/> --%>
+			<c:out value="${u.start_ss }"/>
+			<c:out value="${u.end_ss }"/> --%>
 			
 			<!-- html로 유투브 영상을 만드려고 할 시에는 소수점은 안되고 온전한 초 단위로만 구간 설정이 안된다.   -->
-			<c:set var="start" value="${Math.round (u.start_s)}" />
-			<c:set var="end" value="${Math.round (u.end_s)}" />
+			<c:set var="start" value="${Math.round (u.start_ss)}" />
+			<c:set var="end" value="${Math.round (u.end_ss)}" />
 			<%-- <div>
 				<iframe width="560" height="315" src="https://www.youtube.com/embed/${u.youtubeID}?start=${start }&end=${end}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
 				</iframe>
@@ -166,6 +190,10 @@ $('main').on('click', 'article', function () {
 	</div>
 	
 	<script>
+		var pt;
+		var limit; // for validity check: end time should be less than total duration.
+		var start_time, end_time;
+		
 		$(document).ready(function () {
 			var key = 'AIzaSyC0hiwYHhlDC98F1v9ERNXnziHown0nGjg';
 			var URL = 'https://www.googleapis.com/youtube/v3/videos';
@@ -179,36 +207,40 @@ $('main').on('click', 'article', function () {
 			}
 
 			getVidPT();
-			
+
 			function getVidPT() {
 				$.getJSON(URL, options, function(data) {
 					console.log(data);
-					var pt = data.items[0].contentDetails.duration;
+					pt = data.items[0].contentDetails.duration;
 
 					// https://stackoverflow.com/questions/22148885/converting-youtube-data-api-v3-video-duration-format-to-seconds-in-javascript-no
 			        var regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
 			        var regex_result = regex.exec(pt); //Can be anything like PT2M23S / PT2M / PT28S / PT5H22M31S / PT3H/ PT1H6M /PT1H6S
 			        var hours = parseInt(regex_result[1] || 0);
 			        var minutes = parseInt(regex_result[2] || 0);
-			        var seconds = parseInt(regex_result[3] || 0);
+			        var seconds = parseInt(regex_result[3] || 0) - 1;
+
+			        document.getElementById("end_hh").value = hours;
+			        document.getElementById("end_mm").value = minutes;
+		        	document.getElementById("end_ss").value = seconds;
+		        	
 			        var total_seconds = hours * 60 * 60 + minutes * 60 + seconds;
 
-			       /*  var start = 10;
-			        var end = 15; */
+					// validty check: 
+			        limit = parseInt(total_seconds);
+			        console.log(limit);
+
 					document.getElementById("title").value = data.items[0].snippet.title;
-			        document.getElementById("start_s").value = 22;
-			        document.getElementById("end_s").value = 29;
-			        document.getElementById("end_s").setAttribute("max", total_seconds);
+
+					// 시작 시간을 여기서 정함...수정 요망: 
+			        document.getElementById("start_ss").value = 22;
+			        
 			        //$("end_s").attr("max", total_seconds);
 			        document.getElementById("youtubeID").value = options.id;
-
-			        var end_time = document.getElementById("end_s");
-					console.log(end_time.getAttribute("max"));
 
 					//resultsLoop(data);
 				})
 			}
-			console.log(options);
 			//mainVid(options.id);
 			
 			/* function mainVid(id) {
@@ -255,70 +287,85 @@ $('main').on('click', 'article', function () {
 			// 2. options.id, startSeconds, endSeconds should come from DB later. 
 			player.loadVideoById({'videoId': 'wzAWI9h3q18', 'startSeconds': 22.9092, 'endSeconds': 29.1089});
 		} 
-		  
+
+		var playtime1, playtime2;
+		
 		// 3. get player.playerInfo.currentTime
-		function getCurrentPlayTime1(){
-			// both lines work: document.getElementById("start_s").value = player.playerInfo.currentTime;
-			document.getElementById("start_s").value = player.getCurrentTime();
-			
+		function getCurrentPlayTime1(){	
+			var d = Number(player.getCurrentTime());
+			var h = Math.floor(d / 3600);
+			var m = Math.floor(d % 3600 / 60);
+			var s = d % 3600 % 60;
+		
+			document.getElementById("start_ss").value = parseFloat(s).toFixed(2);
+			document.getElementById("start_hh").value = h;/* .toFixed(2); */
+			document.getElementById("start_mm").value = m;/* .toFixed(2); */
+
+			document.getElementById("start_s").value = parseFloat(d).toFixed(2);
+			start_time = parseFloat(d).toFixed(2);
+			start_time *= 1.00;
+			console.log("check:", typeof start_time);
 		}
 		function getCurrentPlayTime2(){
-			//document.getElementById("end_s").value = player.playerInfo.currentTime;
-			document.getElementById("end_s").value = player.getCurrentTime();
-			
-		}
-
-		function validation(){
-			//var end = document.getElementById("end_s");
-			let limit = document.getElementById("end_s").getAttribute("max");
-			//console.log(limit.value);
-			
-			//let limit = end.getAttribute("max");
-			
-			console.log(limit);
-			document.getElementById("warning1").innerHTML = "";
-			document.getElementById("warning2").innerHTML = "";
-			
-			let x = parseInt(document.forms["timeForm"]["end_s"].value);
-
-			var start_time = parseInt(document.getElementById("start_s").value); 
-			var end_time = parseInt(document.getElementById("end_s").value);
-
-			if(start_time > end_time) {
-				console.log("value of start_time: "+ start_time);	
-				console.log("value of end_time: "+ end_time);
-				document.getElementById("warning1").innerHTML = "start time cannot exceed end time";
-				document.getElementById("start_s").focus();
-				return false;
-			}
-			if(x > limit){
-				console.log("value of x: "+ x);
-				document.getElementById("warning2").innerHTML = "Please insert again";
-				document.getElementById("end_s").focus();
-				return false;
-			}
-			else return true;
-			
-			/* if(!end_time.checkValidity()){
-				document.getElementById("warning").innerHTML = end_time.validationMessage;
-				document.getElementById("end_s").focus();
-				return false;
-			} */
-			//return true;
-		}
+			var d = Number(player.getCurrentTime());
+			var h = Math.floor(d / 3600);
+			var m = Math.floor(d % 3600 / 60);
+			var s = d % 3600 % 60;
 		
+			document.getElementById("end_ss").value = parseFloat(s).toFixed(2);
+			document.getElementById("end_hh").value = h;/* .toFixed(2); */
+			document.getElementById("end_mm").value = m;/* .toFixed(2); */
 
-		
-
-			
-		/* this does not work:
-		var ytplayer;
-		function getCurrentPlayTime(){
-			ytplayer = document.getElementById("video");
-			console.log(ytplayer.currentTime);
-			alert(vid.currentTime);
+			document.getElementById("end_s").value = parseFloat(d).toFixed(2);
+			end_time = parseFloat(d).toFixed(2);
+			end_time *= 1.00;
+			console.log("check", typeof end_time);
+		}
+		/* window.onclick = function() {
+			console.log("start", start_time);
+			console.log("end", end_time);
+			console.log(typeof start_time);
+			console.log(typeof end_time);
+			console.log(typeof limit);
+			//alert("여봐라 ");
 		} */
-		
+		function validation(event){
+			document.getElementById("warning1").innerHTML = "";
+			document.getElementById("warning2").innerHTML = "";	
+
+			// 사용자가 input에서 수기로 시간을 변경했을 시에 필요. 
+			var start_hh = $('#start_hh').val();
+			var start_mm = $('#start_mm').val();
+			var start_ss = $('#start_ss').val();
+
+			start_time = start_hh * 3600.00 + start_mm * 60.00 + start_ss * 1.00;
+			$('#start_s').val(start_time); 
+
+			var end_hh = $('#end_hh').val();
+			var end_mm = $('#end_mm').val();
+			var end_ss = $('#end_ss').val();
+			
+			end_time = end_hh * 3600.00 + end_mm * 60.00 + end_ss * 1.00;
+			$('#end_s').val(end_time);
+
+			console.log("start= ", start_time);
+			console.log("end= ", end_time);
+			
+			if(start_time > end_time) {
+				document.getElementById("warning1").innerHTML = "start time cannot exceed end time";
+				document.getElementById("start_ss").focus();
+				return false;
+			}
+			if(end_time > limit){
+				//console.log("value of x: "+ x);
+				document.getElementById("warning2").innerHTML = "Please insert again";
+				document.getElementById("end_ss").focus();
+				return false;
+			}
+			else {
+				return savePlaylist(event);
+			}
+		}		
 	</script>
 </body>
 </html>
