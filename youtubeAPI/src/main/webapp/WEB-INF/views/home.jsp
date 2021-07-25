@@ -140,8 +140,8 @@ function savePlaylist(event){
 				<input type="hidden" name="start_s" id="start_s">
 				<input type="hidden" name="end_s" id="end_s">
 				video title: <textarea rows="2" cols="50" name="title" id="title" style="margin-bottom: 10px;"> </textarea> <br> 
-				start time:  <input type="text" id="start_hh" maxlength="2" size="2"> 시 <input type="text" id="start_mm" maxlength="2" size="2"> 분 <input type="text" id="start_ss" maxlength="5" size="5"> 초 <button onclick="getCurrentPlayTime1()" type="button"> current Time</button> <span id=warning1 style="color:red;"></span> <br>
-				end time: <input type="text" id="end_hh" max="" maxlength="2" size="2"> 시 <input type="text" id="end_mm" max="" maxlength="2" size="2"> 분 <input type="text" id="end_ss" maxlength="5" size="5"> 초<button onclick="getCurrentPlayTime2()" type="button"> current Time</button>  <span id=warning2 style="color:red;"></span> <br>
+				<button onclick="getCurrentPlayTime1()" type="button"> start time </button> : <input type="text" id="start_hh" maxlength="2" size="2"> 시 <input type="text" id="start_mm" maxlength="2" size="2"> 분 <input type="text" id="start_ss" maxlength="5" size="5"> 초 <button onclick="seekTo1()" type="button"> 위치이동 </button><span id=warning1 style="color:red;"></span> <br>
+				<button onclick="getCurrentPlayTime2()" type="button"> end time </button> : <input type="text" id="end_hh" max="" maxlength="2" size="2"> 시 <input type="text" id="end_mm" max="" maxlength="2" size="2"> 분 <input type="text" id="end_ss" maxlength="5" size="5"> 초 <button onclick="seekTo2()" type="button"> 위치이동 </button> <span id=warning2 style="color:red;"></span> <br>
 				playlist num: <input type="text" name="playlistID" required>
 				
 				<button type="submit" > submit </button>
@@ -260,7 +260,6 @@ function savePlaylist(event){
 				</iframe>`);
 			    console.log(`"https://www.youtube.com/embed/\${id}?start=\${start}&end=\${end}"`);	
 			}
-				
 		});
 		
 		// 1. ytplayer code: https://developers.google.com/youtube/player_parameters#IFrame_Player_API
@@ -365,6 +364,23 @@ function savePlaylist(event){
 			else {
 				return savePlaylist(event);
 			}
+		}
+		function seekTo1(){
+			// 사용자가 input에서 수기로 시간을 변경했을 시에 필요. 
+			var start_hh = $('#start_hh').val();
+			var start_mm = $('#start_mm').val();
+			var start_ss = $('#start_ss').val();
+
+			start_time = start_hh * 3600.00 + start_mm * 60.00 + start_ss * 1.00;
+			player.seekTo(start_time);	
+		}	
+		function seekTo2(){
+			var end_hh = $('#end_hh').val();
+			var end_mm = $('#end_mm').val();
+			var end_ss = $('#end_ss').val();
+			
+			end_time = end_hh * 3600.00 + end_mm * 60.00 + end_ss * 1.00;
+			player.seekTo(end_time);	
 		}		
 	</script>
 </body>
